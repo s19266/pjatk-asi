@@ -1,109 +1,68 @@
-# %%
 from re import X
 import numpy as np
 import pandas as pd
-import pickle
-from sklearn.metrics import mean_squared_error, r2_score
-from datetime import date, datetime
-import os.path
-from sklearn.model_selection import train_test_split
+import mlflow
+import mlflow.pyfunc
+from sklearn.metrics import accuracy_score
+from pathlib import Path
 
-# %%
-previous_r2 = 0.372
-previous_rmse = 0.329
+from utils.train import train
+from utils.prepare import prepare
+from os import path
+from colorama import Fore, Style
 
-# %%
-model = pickle.load(open("mlruns/0/1fcae12c009b4817b459d7caf566030c/artifacts/model/model.pkl", 'rb'))
-test_data = pd.read_csv("data/weatherAUS_clean.csv")
+mlflow.set_tracking_uri("http://localhost:5001")
+data_path = 'data/batches'
+filenames = list(map(
+  lambda child: child.name,
+  filter(lambda child: child.is_file(), Path(data_path).glob('*.csv'))
+))
 
-# %%
-test_data.drop(test_data.columns[[0]], axis=1, inplace=True)
+# Load latest model
+model = mlflow.pyfunc.load_model(model_uri=f"models:/Best/latest")
 
-# %%
-test_data
+# Get mean of all previous accuracies
+r = mlflow.search_runs(filter_string="tags.mlflow.runName = 'Best' AND attribute.status = 'FINISHED'")
+previous_accuracy = r[['metrics.accuracy']].mean()
 
-# %%
-test_data.loc[:,'MinTemp'] *= (1 + np.random.rand() * 0.5) if (np.random.rand() > 0.5) else (1 - np.random.rand() * 0.5)
-test_data.loc[:,'MaxTemp'] *= (1 + np.random.rand() * 0.5) if (np.random.rand() > 0.5) else (1 - np.random.rand() * 0.5)
-test_data.loc[:,'Rainfall'] *= (1 + np.random.rand() * 0.5) if (np.random.rand() > 0.5) else (1 - np.random.rand() * 0.5)
-test_data.loc[:,'Evaporation'] *= (1 + np.random.rand() * 0.5) if (np.random.rand() > 0.5) else (1 - np.random.rand() * 0.5)
-test_data.loc[:,'Sunshine'] *= (1 + np.random.rand() * 0.5) if (np.random.rand() > 0.5) else (1 - np.random.rand() * 0.5)
-test_data.loc[:,'WindGustSpeed'] *= (1 + np.random.rand() * 0.5) if (np.random.rand() > 0.5) else (1 - np.random.rand() * 0.5)
+last_batch_number = 0
 
-# %%
-test_data
+for filename in filenames:
+  (number_as_string, extension) = filename.split('.')
+  number = int(number_as_string)
 
-# %%
+  if (number > last_batch_number):
+    last_batch_number = number
+
+# Load and prepare test data
+print(f"{Fore.CYAN}Loading data/batches/{last_batch_number}.csv")
+test_data = pd.read_csv(f"data/batches/{last_batch_number}.csv")
+test_data = prepare(test_data)
+
 X = test_data.iloc[:,:-1]
 y = test_data.iloc[:,-1]
 
-# %%
+# Evaluate
 predictions = model.predict(X)
 
-# %%
-RMSE = np.sqrt(mean_squared_error(y, predictions))
-r2 = r2_score(y, predictions)
-print('RMSE on test data: ', RMSE)
-print('r2 on test data: ', r2)
+accuracy = accuracy_score(y, predictions)
+print(f'{Fore.YELLOW}Accuracy on new data: {Style.RESET_ALL}{accuracy * 100}%')
 
-# %%
-### Hard test ###
+has_drift = accuracy < np.mean(previous_accuracy) - 2 * np.std(previous_accuracy)
 
-hard_test_RMSE = previous_r2 > np.mean(RMSE)
-hard_test_r2 = previous_r2 < np.mean(r2)
-print('\nLegend: \nTRUE means the model has drifted. FALSE means the model has not.')
-print('\n.. Hard test ..')
-print('RMSE: ', hard_test_RMSE, '  R2: ', hard_test_r2)
+mlflow.start_run(run_name=f"Drift check ({last_batch_number}.csv)")
+mlflow.log_param("accuracy", accuracy)
+mlflow.log_param("drift detected", has_drift)
 
-# %%
-### Parametric test ###
-param_test_RMSE = previous_r2 > np.mean(RMSE) + 2*np.std(RMSE)
-param_test_r2 = previous_r2 < np.mean(r2) - 2*np.std(r2)
+if not has_drift:
+  print(f'{Fore.GREEN}No drift detected {Style.RESET_ALL}')
+else:
+  print(f'{Fore.RED}Drift detected. Running training...{Style.RESET_ALL}')
 
-print('\n.. Parametric test ..')
-print('RMSE: ', param_test_RMSE, '  R2: ', param_test_r2)
+  l = [pd.read_csv(path.join(data_path, filename)) for filename in filenames]
+  full_dataset = pd.concat(l, axis=0)
+  full_dataset = prepare(full_dataset)
 
-# %%
-### Non-parametric (IQR) test ###
-iqr_RMSE = np.quantile(RMSE, 0.75) - np.quantile(RMSE, 0.25)
-iqr_test_RMSE = previous_r2 > np.quantile(RMSE, 0.75) + iqr_RMSE*1.5
+  train(full_dataset)
 
-iqr_r2 = np.quantile(r2, 0.75) - np.quantile(r2, 0.25)
-iqr_test_r2 = previous_r2 < np.quantile(r2, 0.25) - iqr_r2*1.5
-
-print('\n.. IQR test ..')
-print('RMSE: ', iqr_test_RMSE, '  R2: ', iqr_test_r2)
-
-# Re-training signal
-drift_df = pd.DataFrame()
-drift_signal_file = 'evaluation/model_drift.csv'
-now = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-
-# %%
-print('\n  --- DRIFT DETECTION ---')
-
-actual_tests = {
-  'hard_test_RMSE': hard_test_RMSE,
-  'hard_test_r2': hard_test_r2,
-  'param_test_RMSE': param_test_RMSE,
-  'param_test_r2': param_test_r2,
-  'iqr_test_RMSE': iqr_test_RMSE,
-  'iqr_test_r2': iqr_test_r2
-}
-
-# %%
-actual_tests
-
-# %%
-a_set = set(actual_tests.values())
-a_set
-
-# %%
-if True in set(actual_tests.values()):
-  print("")
-
-a_set = set(actual_tests.values())
-drift_detected = True in set(actual_tests.values())
-
-if drift_detected:
-  print("Drift Detected!")
+mlflow.end_run()
