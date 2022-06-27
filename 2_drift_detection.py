@@ -8,10 +8,10 @@ from pathlib import Path
 
 from utils.train import train
 from utils.prepare import prepare
-from os import path
+from os import environ, path
 from colorama import Fore, Style
 
-mlflow.set_tracking_uri("http://localhost:5001")
+mlflow.set_tracking_uri(environ.get('TRACKING_URI', "http://localhost:5001"))
 data_path = 'data/batches'
 filenames = list(map(
   lambda child: child.name,
