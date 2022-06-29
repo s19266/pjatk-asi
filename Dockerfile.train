@@ -1,0 +1,10 @@
+FROM continuumio/miniconda3
+
+WORKDIR /app
+COPY data utils 1_initial_train.py environment.yaml ./
+
+RUN conda update --name base conda
+# RUN conda env create --file environment.yaml
+# SHELL ["conda", "run", "--name", "app", "/bin/bash", "-c"]
+
+ENTRYPOINT ["conda", "run", "--name", "app", "python", "1_initial_train.py"]
