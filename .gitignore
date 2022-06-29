@@ -213,5 +213,3 @@ cython_debug/
 
 mlruns
 db
-
-data/raw_batches
