@@ -19,7 +19,5 @@ services:
     ports:
       - 5001:5001
     volumes:
-      - mlflow:/app
-
-volumes:
-  mlflow:
+      - ./db:/app/db
+      - ./mlruns:/app/mlruns
