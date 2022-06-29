@@ -55,12 +55,12 @@ Pull the latest training data from DVC using the instructions in [DVC step](#dvc
 
 #### Initial training
 ```bash
-docker-compose -f docker-compose.train.yml up
+docker-compose -f docker-compose.train.yml up --abort-on-container-exit
 ```
 
 #### Drift detection
 ```bash
-docker-compose -f docker-compose.drift.yml up
+docker-compose -f docker-compose.drift.yml up --abort-on-container-exit
 ```
 
 ### Running the app on host

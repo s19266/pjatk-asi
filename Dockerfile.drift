@@ -8,5 +8,4 @@ RUN conda env create --file environment.yaml
 
 COPY . .
 
-ENV TRACKING_URI http://host.docker.internal:5001
 ENTRYPOINT ["conda", "run", "--name", "asi3", "python", "2_drift_detection.py"]

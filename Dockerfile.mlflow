@@ -1,0 +1,5 @@
+FROM python:3
+
+RUN pip3 install mlflow
+
+CMD ["mlflow", "server", "--backend-store-uri=sqlite:///mlrunsdb15.db", "--default-artifact-root=file:mlruns", "--host", "0.0.0.0", "--port", "5001"]

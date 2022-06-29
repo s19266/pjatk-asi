@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    depends_on:
+      - mlflow
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TRACKING_URI=http://mlflow:5001
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    ports:
+      - 5001:5001
+    volumes:
+      - mlflow:/app
+
+volumes:
+  mlflow:
