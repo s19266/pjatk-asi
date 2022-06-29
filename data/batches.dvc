@@ -1,0 +1,5 @@
+outs:
+- md5: 6b0df46e72699a0364e092a80d2de22e.dir
+  size: 3904194
+  nfiles: 4
+  path: batches

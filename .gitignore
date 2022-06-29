@@ -214,10 +214,4 @@ cython_debug/
 mlruns
 db
 
-data/batches/*
-data/raw_batches/*
-data/source/*
-
-!data/batches/.gitkeep
-!data/raw_batches/.gitkeep
-!data/source/.gitkeep
+data/raw_batches
