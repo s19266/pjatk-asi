@@ -55,7 +55,7 @@ steps:
   name: docker_build_drift
   inputs:
     containerRegistry: '$(ACR_NAME)'
-    repository: '$(DOCKER_REPO)'
+    repository: '$(DOCKER_REPO)-drift'
     command: 'build'
     Dockerfile: 'Dockerfile.drift'
     buildContext: '$(System.DefaultWorkingDirectory)'
@@ -90,7 +90,7 @@ steps:
   name: docker_build_train
   inputs:
     containerRegistry: '$(ACR_NAME)'
-    repository: '$(DOCKER_REPO)'
+    repository: '$(DOCKER_REPO)-train'
     command: 'build'
     Dockerfile: 'Dockerfile.train'
     buildContext: '$(System.DefaultWorkingDirectory)'
