@@ -92,7 +92,7 @@ steps:
     containerRegistry: '$(ACR_NAME)'
     repository: '$(DOCKER_REPO)'
     command: 'build'
-    Dockerfile: 'Dockerfile.drift'
+    Dockerfile: 'Dockerfile.train'
     buildContext: '$(System.DefaultWorkingDirectory)'
     arguments: '--cache-from=$(ACR_ADDRESS)/$(DOCKER_REPO)-train:latest'
     tags: |
