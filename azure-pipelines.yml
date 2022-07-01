@@ -10,6 +10,10 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  - name: DVC_LINK
+    value: gdrive://1iYfMZcXt28cDG3UfNMENSeHqyGKNWYsP
+
 steps:
 - bash: |
     echo $ARTIFACTS_DESTINATION > .env
@@ -17,8 +21,17 @@ steps:
     echo $TRACKING_URI >> .env
   displayName: '.env file creation'
 
+- task: DownloadSecureFile@1
+  name: prediction_auth
+  displayName: 'Download json auth file'
+  inputs:
+    secureFile: 'prediction_auth.json'
 
 - bash: |
     pip install dvc
-    dvc
-  displayName: 'Run a one-line script'
+    dvc remote add myremote $DVC_LINK
+    dvc remote modify myremote gdrive_use_service_account true
+    dvc remote modify myremote --local \
+              gdrive_service_account_json_file_path $(prediction_auth.secureFilePath)
+    dvc pull
+  displayName: 'Connect to DVC and pull data'
