@@ -32,6 +32,8 @@ steps:
     ls -al
     echo wher am i?
     pwd
+    echo content .env
+    more .env
 
 # - task: DownloadSecureFile@1
 #   name: prediction_auth
