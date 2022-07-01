@@ -1,0 +1,22 @@
+
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - data/*.dvc
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- bash: |
+    echo $ARTIFACTS_DESTINATION > .env
+    echo $AZURE_STORAGE_CONNECTION_STRING >> .env
+    echo $TRACKING_URI >> .env
+  displayName: '.env file creation'
+
+
+- script: dvc
+  displayName: 'Run a one-line script'
