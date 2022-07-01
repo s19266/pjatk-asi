@@ -49,7 +49,7 @@ steps:
 - script: |
     docker pull $(ACR_ADDRESS)/$(DOCKER_REPO)-drift:latest
   displayName: Pull latest Drift image for layer caching
-  condition: in( variables['Build.Reason'], 'BatchedCI' )
+  condition: in( variables['Build.Reason'], 'IndividualCI' )
   continueOnError: true # for first build, no available cache
 - task: Docker@2
   name: docker_build_drift
@@ -63,7 +63,7 @@ steps:
     tags: |
       latest
   displayName: Build Drift Docker image
-  condition: in( variables['Build.Reason'], 'BatchedCI' )
+  condition: in( variables['Build.Reason'], 'IndividualCI' )
 - task: Docker@2
   name: docker_push_drift
   inputs:
@@ -73,12 +73,12 @@ steps:
     tags: |
       latest
   displayName: Push Drift Docker image to ACR
-  condition: in( variables['Build.Reason'], 'BatchedCI' )
+  condition: in( variables['Build.Reason'], 'IndividualCI' )
 
 - bash: |
     docker-compose -f docker-compose.drift.yml up
   displayName: 'Conditionally execute if triggered from CI'
-  condition: in( variables['Build.Reason'], 'BatchedCI' )
+  condition: in( variables['Build.Reason'], 'IndividualCI' )
 
 - script: |
     docker pull $(ACR_ADDRESS)/$(DOCKER_REPO)-train:latest
