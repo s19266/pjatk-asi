@@ -27,6 +27,10 @@ steps:
     echo TRACKING_URI=$(TRACKING_URI) >> .env
   displayName: '.env file creation'
 
+- bash: |
+    cat .env
+  displayName: '.env file creation'
+
 - task: DownloadSecureFile@1
   name: prediction_auth
   displayName: 'Download json auth file'
