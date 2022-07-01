@@ -34,3 +34,13 @@ steps:
               gdrive_service_account_json_file_path $(prediction_auth.secureFilePath)
     dvc pull
   displayName: 'Connect to DVC and pull data'
+
+- bash: |
+    echo test manual
+  displayName: 'Conditionally execute if triggered manually'
+  condition: in( variables['Build.Reason'], 'Manual' )
+
+- bash: |
+    echo test CI
+  displayName: 'Conditionally execute if triggered from CI'
+  condition: in( variables['Build.Reason'], 'BatchedCI' )
