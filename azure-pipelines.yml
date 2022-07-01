@@ -18,5 +18,7 @@ steps:
   displayName: '.env file creation'
 
 
-- script: dvc
+- bash: |
+    snap install --classic dvc
+    dvc
   displayName: 'Run a one-line script'
