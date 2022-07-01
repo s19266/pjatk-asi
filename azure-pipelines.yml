@@ -19,6 +19,6 @@ steps:
 
 
 - bash: |
-    snap install --classic dvc
+    pip install dvc
     dvc
   displayName: 'Run a one-line script'
