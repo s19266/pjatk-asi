@@ -22,7 +22,7 @@ variables:
 
 steps:
 - bash: |
-    echo AZURE_STORAGE_CONNECTION_STRING=$(AZURE_STORAGE_CONNECTION_STRING) > .env
+    echo 'AZURE_STORAGE_CONNECTION_STRING=$(AZURE_STORAGE_CONNECTION_STRING)' > .env
     echo ARTIFACTS_DESTINATION=$(ARTIFACTS_DESTINATION) >> .env
     echo TRACKING_URI=$(TRACKING_URI) >> .env
   displayName: '.env file creation'
