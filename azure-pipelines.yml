@@ -28,7 +28,7 @@ steps:
     secureFile: 'prediction_auth.json'
 
 - bash: |
-    pip install dvc 'dvc[gdrive]' requests=2.28.1
+    pip install dvc 'dvc[gdrive]' requests
     dvc remote modify myremote gdrive_use_service_account true
     dvc remote modify myremote --local \
               gdrive_service_account_json_file_path $(prediction_auth.secureFilePath)
