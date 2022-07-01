@@ -48,7 +48,7 @@ steps:
   displayName: "Docker login to acr"
 - script: |
     docker pull $(ACR_ADDRESS)/$(DOCKER_REPO)-drift:latest
-  displayName: Pull latest Dift image for layer caching
+  displayName: Pull latest Drift image for layer caching
   condition: in( variables['Build.Reason'], 'BatchedCI' )
   continueOnError: true # for first build, no available cache
 - task: Docker@2
@@ -62,7 +62,7 @@ steps:
     arguments: '--cache-from=$(ACR_ADDRESS)/$(DOCKER_REPO)-drift:latest'
     tags: |
       latest
-  displayName: Build Dift Docker image
+  displayName: Build Drift Docker image
   condition: in( variables['Build.Reason'], 'BatchedCI' )
 - task: Docker@2
   name: docker_push_drift
@@ -72,7 +72,7 @@ steps:
     command: 'push'
     tags: |
       latest
-  displayName: Push Dift Docker image to ACR
+  displayName: Push Drift Docker image to ACR
   condition: in( variables['Build.Reason'], 'BatchedCI' )
 
 - bash: |
