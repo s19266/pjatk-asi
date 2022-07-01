@@ -7,17 +7,3 @@ services:
       dockerfile: Dockerfile.drift
     env_file:
       - .env
-    depends_on:
-      - mlflow
-
-  mlflow:
-    build:
-      context: .
-      dockerfile: Dockerfile.mlflow
-    env_file:
-      - .env
-    ports:
-      - 5001:5001
-    volumes:
-      - ./db/mlrunsdb15.db:/app/mlrunsdb15.db
-      - ./mlruns:/app/mlruns
