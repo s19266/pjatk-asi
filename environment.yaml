@@ -8,6 +8,7 @@ dependencies:
   - asn1crypto=1.5.1
   - asttokens=2.0.5
   - azure-core=1.24.2
+  - azure-identity=1.10.0
   - azure-storage-blob=12.12.0
   - backcall=0.2.0
   - backports=1.0
@@ -64,6 +65,8 @@ dependencies:
   - markupsafe=2.1.1
   - matplotlib-inline=0.1.3
   - mlflow=1.26.1
+  - msal=1.17.0
+  - msal_extensions=1.0.0
   - msrest=0.6.21
   - ncurses=6.3
   - nest-asyncio=1.5.5
@@ -76,6 +79,7 @@ dependencies:
   - pexpect=4.8.0
   - pickleshare=0.7.5
   - pip=22.1.2
+  - portalocker=2.4.0
   - prometheus_client=0.14.1
   - prometheus_flask_exporter=0.20.2
   - prompt-toolkit=3.0.29
