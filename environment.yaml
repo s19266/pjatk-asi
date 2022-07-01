@@ -7,9 +7,12 @@ dependencies:
   - appnope=0.1.3
   - asn1crypto=1.5.1
   - asttokens=2.0.5
+  - azure-core=1.24.2
+  - azure-storage-blob=12.12.0
   - backcall=0.2.0
   - backports=1.0
   - backports.functools_lru_cache=1.6.4
+  - blinker=1.4
   - brotlipy=0.7.0
   - bzip2=1.0.8
   - ca-certificates=2022.6.15
@@ -38,6 +41,7 @@ dependencies:
   - importlib_resources=5.8.0
   - ipykernel=6.15.0
   - ipython=8.4.0
+  - isodate=0.6.1
   - itsdangerous=2.1.2
   - jedi=0.18.1
   - jinja2=3.1.2
@@ -46,10 +50,10 @@ dependencies:
   - jupyter_core=4.10.0
   - libblas=3.9.0
   - libcblas=3.9.0
-  # - libcxx=14.0.8
+  # - libcxx=14.0.6
   - libffi=3.4.2
-  # - libgfortran=3.0.0
-  # - libgfortran5=12.1.0
+  # - libgfortran=5.0.0.dev0
+  # - libgfortran5=11.0.1.dev0
   - liblapack=3.9.0
   - libopenblas=0.3.20
   - libprotobuf=3.20.1
@@ -60,9 +64,11 @@ dependencies:
   - markupsafe=2.1.1
   - matplotlib-inline=0.1.3
   - mlflow=1.26.1
+  - msrest=0.6.21
   - ncurses=6.3
   - nest-asyncio=1.5.5
   - numpy=1.22.4
+  - oauthlib=3.2.0
   - openssl=1.1.1p
   - packaging=21.3
   - pandas=1.4.2
@@ -79,6 +85,7 @@ dependencies:
   - pure_eval=0.2.2
   - pycparser=2.21
   - pygments=2.12.0
+  - pyjwt=2.4.0
   - pyopenssl=22.0.0
   - pyparsing=3.0.9
   - pysocks=1.7.1
@@ -91,6 +98,7 @@ dependencies:
   - querystring_parser=1.2.4
   - readline=8.1.2
   - requests=2.28.0
+  - requests-oauthlib=1.3.1
   - scikit-learn=1.1.1
   - scipy=1.8.1
   - setuptools=62.6.0
@@ -106,6 +114,7 @@ dependencies:
   - tk=8.6.12
   - tornado=6.1
   - traitlets=5.3.0
+  - typing-extensions=4.2.0
   - typing_extensions=4.2.0
   - tzdata=2022a
   - urllib3=1.26.9

@@ -5,19 +5,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.drift
+    env_file:
+      - .env
     depends_on:
       - mlflow
-    volumes:
-      - ./data:/app/data
-    environment:
-      - TRACKING_URI=http://mlflow:5001
 
   mlflow:
     build:
       context: .
       dockerfile: Dockerfile.mlflow
+    env_file:
+      - .env
     ports:
       - 5001:5001
     volumes:
-      - ./db:/app/db
+      - ./db/mlrunsdb15.db:/app/mlrunsdb15.db
       - ./mlruns:/app/mlruns

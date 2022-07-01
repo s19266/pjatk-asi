@@ -6,6 +6,8 @@ COPY environment.yaml ./
 RUN conda update --name base conda
 RUN conda env create --file environment.yaml
 
-COPY . .
+COPY utils/ ./utils
+COPY 2_drift_detection.py 2_drift_detection.py
+COPY data data
 
 ENTRYPOINT ["conda", "run", "--name", "asi3", "python", "2_drift_detection.py"]
