@@ -5,17 +5,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.train
-    env_file:
-      - .env
     depends_on:
       - mlflow
+    environment:
+      - TRACKING_URI=http://mlflow:5001
+    volumes:
+      - ./mlruns:/app/mlruns
 
   mlflow:
     build:
       context: .
       dockerfile: Dockerfile.mlflow
-    env_file:
-      - .env
+    environment:
+      - ARTIFACTS_DESTINATION=file:/app/mlruns
     ports:
       - 5001:5001
     volumes:

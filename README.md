@@ -55,12 +55,17 @@ Pull the latest training data from DVC using the instructions in [DVC step](#dvc
 
 #### Initial training
 ```bash
-docker-compose -f docker-compose.train.yml up --abort-on-container-exit
+docker-compose -f docker-compose.train.local.yml up --build --abort-on-container-exit
 ```
 
 #### Drift detection
 ```bash
-docker-compose -f docker-compose.drift.yml up --abort-on-container-exit
+docker-compose -f docker-compose.drift.local.yml up --build --abort-on-container-exit
+```
+
+#### Running MLFlow only
+```bash
+docker-compose -f docker-compose.drift.local.yml up mlflow --build --abort-on-container-exit
 ```
 
 ### Running the app on host
