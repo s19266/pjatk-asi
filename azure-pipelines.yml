@@ -27,99 +27,91 @@ steps:
     echo TRACKING_URI=$(TRACKING_URI) >> .env
   displayName: '.env file creation'
 
+- task: DownloadSecureFile@1
+  name: prediction_auth
+  displayName: 'Download json auth file'
+  inputs:
+    secureFile: 'prediction_auth.json'
+
 - bash: |
-    echo content currdir
-    ls -al
-    echo wher am i?
-    pwd
-    echo content .env
-    more .env
+    pip install requests==2.28.1 dvc pydrive2
+    dvc remote modify myremote gdrive_use_service_account true
+    dvc remote modify myremote --local \
+              gdrive_service_account_json_file_path $(prediction_auth.secureFilePath)
+    dvc pull
+  displayName: 'Connect to DVC and pull data'
 
-# - task: DownloadSecureFile@1
-#   name: prediction_auth
-#   displayName: 'Download json auth file'
-#   inputs:
-#     secureFile: 'prediction_auth.json'
+- task: Docker@2
+  inputs:
+    containerRegistry: '$(ACR_NAME)'
+    command: 'login'
+  displayName: "Docker login to acr"
+- script: |
+    docker pull $(ACR_ADDRESS)/$(DOCKER_REPO)-drift:latest
+  displayName: Pull latest Drift image for layer caching
+  condition: in( variables['Build.Reason'], 'BatchedCI' )
+  continueOnError: true # for first build, no available cache
+- task: Docker@2
+  name: docker_build_drift
+  inputs:
+    containerRegistry: '$(ACR_NAME)'
+    repository: '$(DOCKER_REPO)'
+    command: 'build'
+    Dockerfile: 'Dockerfile.drift'
+    buildContext: '$(System.DefaultWorkingDirectory)'
+    arguments: '--cache-from=$(ACR_ADDRESS)/$(DOCKER_REPO)-drift:latest'
+    tags: |
+      latest
+  displayName: Build Drift Docker image
+  condition: in( variables['Build.Reason'], 'BatchedCI' )
+- task: Docker@2
+  name: docker_push_drift
+  inputs:
+    containerRegistry: '$(ACR_NAME)'
+    repository: '$(DOCKER_REPO)-drift'
+    command: 'push'
+    tags: |
+      latest
+  displayName: Push Drift Docker image to ACR
+  condition: in( variables['Build.Reason'], 'BatchedCI' )
 
-# - bash: |
-#     pip install requests==2.28.1 dvc pydrive2
-#     dvc remote modify myremote gdrive_use_service_account true
-#     dvc remote modify myremote --local \
-#               gdrive_service_account_json_file_path $(prediction_auth.secureFilePath)
-#     dvc pull
-#   displayName: 'Connect to DVC and pull data'
+- bash: |
+    docker-compose -f docker-compose.drift.yml up
+  displayName: 'Conditionally execute if triggered from CI'
+  condition: in( variables['Build.Reason'], 'BatchedCI' )
 
-# - task: Docker@2
-#   inputs:
-#     containerRegistry: '$(ACR_NAME)'
-#     command: 'login'
-#   displayName: "Docker login to acr"
-# - script: |
-#     docker pull $(ACR_ADDRESS)/$(DOCKER_REPO)-drift:latest
-#   displayName: Pull latest Drift image for layer caching
-#   condition: in( variables['Build.Reason'], 'BatchedCI' )
-#   continueOnError: true # for first build, no available cache
-# - task: Docker@2
-#   name: docker_build_drift
-#   inputs:
-#     containerRegistry: '$(ACR_NAME)'
-#     repository: '$(DOCKER_REPO)'
-#     command: 'build'
-#     Dockerfile: 'Dockerfile.drift'
-#     buildContext: '$(System.DefaultWorkingDirectory)'
-#     arguments: '--cache-from=$(ACR_ADDRESS)/$(DOCKER_REPO)-drift:latest'
-#     tags: |
-#       latest
-#   displayName: Build Drift Docker image
-#   condition: in( variables['Build.Reason'], 'BatchedCI' )
-# - task: Docker@2
-#   name: docker_push_drift
-#   inputs:
-#     containerRegistry: '$(ACR_NAME)'
-#     repository: '$(DOCKER_REPO)-drift'
-#     command: 'push'
-#     tags: |
-#       latest
-#   displayName: Push Drift Docker image to ACR
-#   condition: in( variables['Build.Reason'], 'BatchedCI' )
+- script: |
+    docker pull $(ACR_ADDRESS)/$(DOCKER_REPO)-train:latest
+  displayName: Pull latest Train image for layer caching
+  condition: in( variables['Build.Reason'], 'Manual' )
+  continueOnError: true # for first build, no available cache
 
-# - bash: |
-#     docker-compose -f docker-compose.drift.yml up
-#   displayName: 'Conditionally execute if triggered from CI'
-#   condition: in( variables['Build.Reason'], 'BatchedCI' )
+- task: Docker@2
+  name: docker_build_train
+  inputs:
+    containerRegistry: '$(ACR_NAME)'
+    repository: '$(DOCKER_REPO)'
+    command: 'build'
+    Dockerfile: 'Dockerfile.drift'
+    buildContext: '$(System.DefaultWorkingDirectory)'
+    arguments: '--cache-from=$(ACR_ADDRESS)/$(DOCKER_REPO)-train:latest'
+    tags: |
+      latest
+  displayName: Build Train Docker image
+  condition: in( variables['Build.Reason'], 'Manual' )
+- task: Docker@2
+  name: docker_push_train
+  inputs:
+    containerRegistry: '$(ACR_NAME)'
+    repository: '$(DOCKER_REPO)-train'
+    command: 'push'
+    tags: |
+      latest
+  displayName: Push Train Docker image to ACR
+  condition: in( variables['Build.Reason'], 'Manual' )
 
-# - script: |
-#     docker pull $(ACR_ADDRESS)/$(DOCKER_REPO)-train:latest
-#   displayName: Pull latest Train image for layer caching
-#   condition: in( variables['Build.Reason'], 'Manual' )
-#   continueOnError: true # for first build, no available cache
-
-# - task: Docker@2
-#   name: docker_build_train
-#   inputs:
-#     containerRegistry: '$(ACR_NAME)'
-#     repository: '$(DOCKER_REPO)'
-#     command: 'build'
-#     Dockerfile: 'Dockerfile.drift'
-#     buildContext: '$(System.DefaultWorkingDirectory)'
-#     arguments: '--cache-from=$(ACR_ADDRESS)/$(DOCKER_REPO)-train:latest'
-#     tags: |
-#       latest
-#   displayName: Build Train Docker image
-#   condition: in( variables['Build.Reason'], 'Manual' )
-# - task: Docker@2
-#   name: docker_push_train
-#   inputs:
-#     containerRegistry: '$(ACR_NAME)'
-#     repository: '$(DOCKER_REPO)-train'
-#     command: 'push'
-#     tags: |
-#       latest
-#   displayName: Push Train Docker image to ACR
-#   condition: in( variables['Build.Reason'], 'Manual' )
-
-# - bash: |
-#     docker-compose -f docker-compose.train.yml up
-#     echo test manual
-#   displayName: 'Conditionally execute if triggered manually'
-#   condition: in( variables['Build.Reason'], 'Manual' )
+- bash: |
+    docker-compose -f docker-compose.train.yml up
+    echo test manual
+  displayName: 'Conditionally execute if triggered manually'
+  condition: in( variables['Build.Reason'], 'Manual' )
